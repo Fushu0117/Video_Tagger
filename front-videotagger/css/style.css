@@ -1,0 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  --slider-height: 5.4px;
+  --thumb-height: 16px;
+  --timestamp-size: 10px;
+  --controls-height: 50px;
+}
+
+body {
+  margin: auto;
+  width: 90%;
+  display: grid;
+  grid-template-columns: 8fr 2fr;
+}
+
+.drop-zone {
+  background-color: rgb(14, 104, 182);
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+}

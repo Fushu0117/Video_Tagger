@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom video player</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/videoPlayer.css" />
+    <script
+      src="https://kit.fontawesome.com/533f790df8.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="armas-videoplayer">
+      <video
+        class="armas-videoplayer__video"
+        src="https://gdurl.com/bieu"
+      ></video>
+      <div class="armas-videoplayer__controls video-controls">
+        <div class="video-controls__main-btn video-controls__main-btn_play">
+          <i class="fas fa-play video-controls__play"></i>
+          <i class="fas fa-pause video-controls__pause"></i>
+        </div>
+        <div class="video-controls__progress-container">
+          <custom-range class="video-controls__progress"></custom-range>
+          <ul class="video-controls__timestamps"></ul>
+        </div>
+        <div class="video-controls__time">
+          <span class="video-controls__current">0:00</span> /
+          <span class="video-controls__duration">1:20:15</span>
+        </div>
+        <div
+          class="video-controls__add-timestamp btn"
+          title="add timestamp here"
+        >
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+      <div class="timestamp-editor">
+        <div class="horizontal-container">
+          <span class="timestamp-editor__time">time</span>
+          <button class="timestamp-editor__close btn_transparent">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <textarea class="timestamp-editor__text"></textarea>
+        <button class="timestamp-editor__save btn">save</button>
+        <button class="timestamp-editor__rewind btn">rewind</button>
+        <button class="timestamp-editor__delete btn">delete</button>
+      </div>
+    </div>
+    <div class="drop-zone">Algo</div>
+    <script src="js/index.js" type="module"></script>
+  </body>
+</html>
