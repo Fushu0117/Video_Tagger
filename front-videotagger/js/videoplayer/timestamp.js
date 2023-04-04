@@ -1,4 +1,4 @@
-import { formatTime } from "./utils.js";
+import { formatTime } from "../utils/formatTime.js";
 
 export default class TimestampManager {
   constructor({ onRewind }) {
@@ -11,18 +11,18 @@ export default class TimestampManager {
     this.textField = this.editor.querySelector(".timestamp-editor__text");
     this.saveBtn = this.editor.querySelector(".timestamp-editor__save");
     this.deleteBtn = this.editor.querySelector(".timestamp-editor__delete");
-    this.rewindBtn = this.editor.querySelector(".timestamp-editor__rewind");
+    // this.rewindBtn = this.editor.querySelector(".timestamp-editor__rewind");
     this.activeTimestamp = null;
     this.closeBtn.addEventListener("click", this.closeEditor.bind(this));
     this.saveBtn.addEventListener("click", this.closeEditor.bind(this));
     this.deleteBtn.addEventListener("click", () => {
       this.deleteTimestamp(this.activeTimestamp.dataset.id);
     });
-    this.rewindBtn.addEventListener("click", (e) => {
-      onRewind(
-        this.info.find((el) => el.id == this.activeTimestamp.dataset.id).time
-      );
-    });
+    // this.rewindBtn.addEventListener("click", (e) => {
+    //   onRewind(
+    //     this.info.find((el) => el.id == this.activeTimestamp.dataset.id).time
+    //   );
+    // });
   }
 
   addTimestamp(percent, time) {

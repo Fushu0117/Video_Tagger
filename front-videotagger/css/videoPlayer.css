@@ -50,18 +50,18 @@ custom-range {
  * Video player
  */
 
-.armas-videoplayer {
+.videoplayer {
   position: relative;
   width: 100%;
 }
 
-.armas-videoplayer__video {
+.videoplayer__video {
   display: block;
   background-color: black;
   width: 100%;
 }
 
-.armas-videoplayer__controls {
+.videoplayer__controls {
   position: absolute;
   width: 100%;
   height: var(--controls-height);

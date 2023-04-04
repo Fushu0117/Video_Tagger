@@ -1,5 +1,6 @@
-import TimestampManager from "./TimestampManager.js";
-import { formatTime } from "./utils.js";
+import TimestampManager from "./timestamp.js";
+import { formatTime } from "../utils/formatTime.js";
+import { $ } from "../utils/dom.js";
 
 export default class VideoPlayer {
   constructor() {
@@ -8,13 +9,11 @@ export default class VideoPlayer {
     });
     this.isPlaying = false;
 
-    this.video = document.querySelector(".armas-videoplayer__video");
-    this.mainBtn = document.querySelector(".video-controls__main-btn");
-    this.progressBar = document.querySelector(".video-controls__progress");
-    this.currentTime = document.querySelector(".video-controls__current");
-    this.addTimestampBtn = document.querySelector(
-      ".video-controls__add-timestamp"
-    );
+    this.video = $(".videoplayer__video");
+    this.mainBtn = $(".video-controls__main-btn");
+    this.progressBar = $(".video-controls__progress");
+    this.currentTime = $(".video-controls__current");
+    this.addTimestampBtn = $(".video-controls__add-timestamp");
 
     this.updateProgress = this.updateProgress.bind(this);
 
