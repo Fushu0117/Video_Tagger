@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom video player</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/videoPlayer.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://kit.fontawesome.com/533f790df8.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div>
+      <h1 id="name">Nombre:</h1>
+      <img id="image" />
+      <button class="btn btn-primary" id="videos">Obtener videos</button>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Video</th>
+            <th scope="col">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="result"></tbody>
+      </table>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+  <script>
+    const url = window.location.href;
+    const urlWithoutHtml = url.substring(0, url.lastIndexOf("/"));
+
+    var params = {};
+    var regex = /([^&=]+)=([^&]*)/g,
+      m;
+    while ((m = regex.exec(location.href))) {
+      params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+    if (Object.keys(params).length > 0) {
+      localStorage.setItem("authInfo", JSON.stringify(params));
+    }
+    window.history.pushState(
+      {},
+      document.title,
+      // "/front-videotagger/" + "index.html"
+      urlWithoutHtml + "/index.html"
+    );
+    let info = JSON.parse(localStorage.getItem("authInfo"));
+    console.log(info["access_token"]);
+    console.log(info["expires_in"]);
+
+    fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: {
+        Authorization: `Bearer ${info["access_token"]}`,
+      },
+    })
+      .then((data) => data.json())
+      .then((info) => {
+        console.log(info);
+        document.getElementById("name").innerHTML += info.name;
+        document.getElementById("image").setAttribute("src", info.picture);
+      });
+
+    function logout() {
+      fetch(
+        "https://oauth2.googleapis.com/revoke?token=" + info["access_token"],
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/x-www-form-urlencoded",
+          },
+        }
+      ).then((data) => {
+        location.href = `${urlWithoutHtml}/index.html`;
+      });
+    }
+
+    let videos = document.getElementById("videos");
+    let result = document.getElementById("result");
+    let ACCESS_TOKEN = info["access_token"];
+    console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
+    function searchFiles(q = "") {
+      result.innerHTML = "";
+      fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${q}&pageSize=50&supportsAllDrives=true&fields=files(name,id,mimeType)`,
+        {
+          method: "GET",
+          headers: new Headers({ Authorization: "Bearer " + ACCESS_TOKEN }),
+        }
+      )
+        .then((res) => {
+          return res.json();
+        })
+        .then(function (val) {
+          console.log(val);
+          val.files.forEach((file) => {
+            let id = file.id;
+            result.innerHTML += `
+            <tr>
+                <td><a target="_blank" href="https://drive.google.com/file/d/${file.id}">${file.name}</a>
+                </td>
+                <td>
+                <button class="btn btn-primary" onclick="location.href = '${urlWithoutHtml}/player.html?id=${id}'">Ver</button>
+                </td>
+            </tr>
+            `;
+          });
+        });
+    }
+
+    function getVideos() {
+      searchFiles("mimeType contains 'video/'");
+    }
+
+    videos.onclick = getVideos;
+  </script>
+</html>
