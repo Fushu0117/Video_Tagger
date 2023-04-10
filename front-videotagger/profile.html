@@ -41,7 +41,7 @@
   </body>
   <script>
     const url = window.location.href;
-    const urlWithoutHtml = url.substring(0, url.lastIndexOf("/"));
+    let urlWithoutHtml = url.substring(0, url.lastIndexOf("/"));
 
     var params = {};
     var regex = /([^&=]+)=([^&]*)/g,
@@ -55,12 +55,21 @@
     window.history.pushState(
       {},
       document.title,
-      // "/front-videotagger/" + "index.html"
       urlWithoutHtml + "/index.html"
     );
+
+    urlWithoutHtml = urlWithoutHtml.substring(
+      0,
+      urlWithoutHtml.lastIndexOf("#")
+    );
+    urlWithoutHtml = urlWithoutHtml.substring(
+      0,
+      urlWithoutHtml.lastIndexOf("/")
+    );
+
+    window.location.hash = "";
+
     let info = JSON.parse(localStorage.getItem("authInfo"));
-    console.log(info["access_token"]);
-    console.log(info["expires_in"]);
 
     fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: {
@@ -69,7 +78,6 @@
     })
       .then((data) => data.json())
       .then((info) => {
-        console.log(info);
         document.getElementById("name").innerHTML += info.name;
         document.getElementById("image").setAttribute("src", info.picture);
       });
@@ -91,7 +99,6 @@
     let videos = document.getElementById("videos");
     let result = document.getElementById("result");
     let ACCESS_TOKEN = info["access_token"];
-    console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
     function searchFiles(q = "") {
       result.innerHTML = "";
       fetch(
@@ -105,15 +112,16 @@
           return res.json();
         })
         .then(function (val) {
-          console.log(val);
+          videos.removeAttribute("disabled", "");
           val.files.forEach((file) => {
             let id = file.id;
+            console.log("datos del file: ", file);
             result.innerHTML += `
             <tr>
                 <td><a target="_blank" href="https://drive.google.com/file/d/${file.id}">${file.name}</a>
                 </td>
                 <td>
-                <button class="btn btn-primary" onclick="location.href = '${urlWithoutHtml}/player.html?id=${id}'">Ver</button>
+                <button class="btn btn-primary" onclick="setVideo('${urlWithoutHtml}', '${id}', '${file.name}')">Ver</button>
                 </td>
             </tr>
             `;
@@ -123,6 +131,13 @@
 
     function getVideos() {
       searchFiles("mimeType contains 'video/'");
+      videos.setAttribute("disabled", "");
+    }
+
+    function setVideo(url, id, fileName) {
+      // let videoInfo = localStorage.getItem("videoInfo");
+      localStorage.setItem("videoInfo", JSON.stringify({ name: fileName }));
+      location.href = `${url}/player.html?id=${id}`;
     }
 
     videos.onclick = getVideos;

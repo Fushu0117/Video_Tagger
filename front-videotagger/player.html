@@ -16,7 +16,7 @@
       src="https://kit.fontawesome.com/533f790df8.js"
       crossorigin="anonymous"
     ></script>
-    <title>Player</title>
+    <title id="page-title">Player</title>
   </head>
   <body>
     <style>
@@ -40,12 +40,17 @@
         width: 50%;
       }
     </style>
-    <h1>Player</h1>
+    <h1 id="video-title">Player</h1>
     <div class="container-player">
       <div class="yt">
         <iframe width="560" height="315" allowfullscreen></iframe>
       </div>
-      <button class="btn btn-primary mt-2">Crear timestamp</button>
+      <div class="mt-2">
+        <button class="btn btn-primary">Crear timestamp</button>
+        <button class="btn btn-dark" id="timestamp">
+          Saltar al minuto 2:12
+        </button>
+      </div>
     </div>
     <script src="js/index.js" type="module"></script>
   </body>
@@ -57,32 +62,19 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
-    // const video_preview = document.getElementById("video_preview");
     const video_preview = document.querySelector("iframe");
     video_preview.src = `https://drive.google.com/file/d/${id}/preview`;
-    // const client_id =
-    //   "601367704101-0h4nc876bgfve25ar3khur78e5ggespp.apps.googleusercontent.com";
-    // video_preview.src = `https://drive.google.com/uc?export=download&id=${id}`;
 
-    // video_preview.src = `https://drive.google.com/uc?export=preview&id=${id}`;
-    // video_preview.src = `https://www.googleapis.com/drive/v3/files/${id}?key=${client_id}&alt=media`;
-    // video_preview.type = "video/mp4";
-    // let info = JSON.parse(localStorage.getItem("authInfo"));
-    // fetch(
-    //   `https://www.googleapis.com/drive/v3/files/${id}?fields=webViewLink&key=${client_id}`,
-    //   {
-    //     method: "GET",
-    //     headers: {
-    //       Authorization: "Bearer " + info["access_token"],
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // )
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const webViewLink = data.webViewLink;
-    //     console.log(webViewLink);
-    //     video_preview.src = webViewLink;
-    //   });
+    const video_title = document.querySelector("#video-title");
+    const page_title = document.querySelector("#page-title");
+
+    let video = JSON.parse(localStorage.getItem("videoInfo"));
+    video_title.innerHTML = video.name;
+    page_title.innerHTML = video.name;
+
+    const timestamp = document.querySelector("#timestamp");
+    timestamp.addEventListener("click", () => {
+      video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=4`;
+    });
   </script>
 </html>

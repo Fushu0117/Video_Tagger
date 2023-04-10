@@ -1,5 +1,3 @@
-// import { urlWithoutHtml } from "../utils/getUrl.js";
-
 function signIn() {
   const oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
 
@@ -13,7 +11,6 @@ function signIn() {
   const params = {
     client_id:
       "601367704101-0h4nc876bgfve25ar3khur78e5ggespp.apps.googleusercontent.com",
-    // redirect_uri: "http://localhost:3000/front-videotagger/index.html",
     redirect_uri: `${urlWithoutHtml}/profile.html`,
     response_type: "token",
     scope:
