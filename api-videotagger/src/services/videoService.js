@@ -13,6 +13,21 @@ const getVideos = async () => {
   return { status: 200, data: data };
 };
 
+const getVideosFromEmail = async (email) => {
+  const { data, error } = await supabase
+    .from('videos')
+    .select()
+    .eq('email', email);
+  if (error) {
+    console.log(colors.red('Error getting videos: ' + error));
+    return {
+      status: 500,
+      error: error
+    };
+  }
+  return { status: 200, data: data };
+};
+
 const insertVideo = async (video) => {
   const { data, error } = await supabase.from('videos').insert(video);
   if (error) {
@@ -27,5 +42,6 @@ const insertVideo = async (video) => {
 
 module.exports = {
   getVideos,
+  getVideosFromEmail,
   insertVideo
 };
