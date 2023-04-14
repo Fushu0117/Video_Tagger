@@ -14,7 +14,7 @@ function signIn() {
     redirect_uri: `${urlWithoutHtml}/profile.html`,
     response_type: "token",
     scope:
-      "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email",
     include_granted_scopes: "true",
     state: "pass-through value",
   };

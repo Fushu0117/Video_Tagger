@@ -12,8 +12,17 @@
       integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
     <script
       src="https://kit.fontawesome.com/533f790df8.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
       crossorigin="anonymous"
     ></script>
     <title id="page-title">Player</title>
@@ -32,49 +41,247 @@
         left: 0;
         width: 100%;
         height: 100%;
+        border-radius: 2%;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        /* align-items: center; */
+        width: 100vw;
+        /* height: 50vh;z */
       }
       .container-player {
         display: flex;
         flex-direction: column;
         align-items: center;
         width: 50%;
+        /* padding: 50px; */
+        margin: 0 25px;
+      }
+      .container-player .mt-2 {
+        display: flex;
+        justify-content: space-between;
+        width: 50%;
+      }
+      .container-player .mt-2 button {
+        width: 100%;
+      }
+      .container-timestamp {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 50%;
+        /* add scroll to the list */
+        overflow-y: scroll;
+        height: 80vh;
+
+        /* padding: 50px; */
       }
     </style>
-    <h1 id="video-title">Player</h1>
-    <div class="container-player">
-      <div class="yt">
-        <iframe width="560" height="315" allowfullscreen></iframe>
+
+    <h1 id="video-title" class="text-center m-5"></h1>
+    <div class="container">
+      <div class="container-player">
+        <div class="yt">
+          <iframe
+            class="border-2"
+            frameborder="0"
+            width="560"
+            height="315"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <div class="mt-2" id="botones">
+          <button class="btn btn-outline-secondary m-1" id="btn-home">
+            Regresar
+          </button>
+          <button
+            class="btn btn-primary m-1"
+            data-bs-toggle="modal"
+            data-bs-target="#contenedor-modal"
+          >
+            Crear timestamp
+          </button>
+        </div>
+        <div class="modal fade" id="contenedor-modal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <form>
+                <div class="modal-header">
+                  <h5 class="modal-title">Crear timestamp</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="timestamp-input" class="m-2"
+                      >Tiempo (en horas o minutos)</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="timestamp-input"
+                      placeholder="01:00 o 01:00:00"
+                      pattern="^(?:([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?)$"
+                      required
+                    />
+                    <label for="exampleFormControlInput2" class="m-2"
+                      >Nota</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="exampleFormControlInput2"
+                      rows="3"
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button class="btn btn-primary" id="btn-save">Guardar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mt-2">
-        <button class="btn btn-primary">Crear timestamp</button>
-        <!-- <button class="btn btn-dark" id="timestamp">
-          Saltar al minuto 2:12
-        </button> -->
+      <div class="container-timestamp">
+        <h2>Etiquetas</h2>
+        <div class="row" id="timestamp"></div>
       </div>
     </div>
     <script src="js/index.js" type="module"></script>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
+      const video_preview = document.querySelector("iframe");
+      video_preview.src = `https://drive.google.com/file/d/${id}/preview`;
+
+      const video_title = document.querySelector("#video-title");
+      const page_title = document.querySelector("#page-title");
+
+      let video = JSON.parse(localStorage.getItem("videoInfo"));
+      video_title.innerHTML = video.name;
+      page_title.innerHTML = video.name;
+
+      const timestamp = document.querySelector("#timestamp");
+      timestamp?.addEventListener("click", () => {
+        console.log("click");
+        video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=4`;
+      });
+
+      const btn_home = document.querySelector("#btn-home");
+      btn_home?.addEventListener("click", () => {
+        window.location.href = "profile.html";
+      });
+
+      const form = document.querySelector("form");
+      const btnSave = document.querySelector("#btn-save");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const timestamp = document.querySelector("#timestamp-input").value;
+        const note = document.querySelector("#exampleFormControlInput2").value;
+        const data = {
+          note,
+          timestamp,
+          user: video.email,
+          video: id,
+          videoTitle: video.name,
+        };
+        fetch(
+          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tag",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            window.location.reload();
+          });
+      });
+
+      fetch(
+        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tag/${id}/${video.email}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data", data.data);
+          data.data.forEach((element) => {
+            console.log(element);
+            console.log("element.time", element.timestamp);
+            const card = document.createElement("div");
+            card.classList.add("card", "m-1");
+            card.style.width = "28rem";
+            const cardBody = document.createElement("div");
+            cardBody.classList.add("card-body");
+            cardBody.style.display = "flex";
+            cardBody.style.flexDirection = "column";
+            const cardText = document.createElement("p");
+            cardText.classList.add("card-text");
+            cardText.innerHTML = element.note;
+            const cardLink = document.createElement("a");
+            cardLink.classList.add("btn", "btn-primary");
+            cardLink.innerHTML = `Saltar al minuto ${element.timestamp}`;
+            cardLink.addEventListener("click", () => {
+              // convert timestamp to minutes
+              const minutes = element.timestamp.split(":")[0];
+              const seconds = element.timestamp.split(":")[1];
+              const totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
+
+              video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${totalSeconds}`;
+
+              // video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${element.timestamp}`;
+            });
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.classList.add("btn", "btn-danger");
+            deleteBtn.innerHTML = `<i class="bi bi-trash"></i>`;
+            deleteBtn.addEventListener("click", () => {
+              console.log("element", element.id);
+              fetch(
+                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tag/${element.id}`,
+                {
+                  method: "DELETE",
+                }
+              )
+                .then((res) => res.json())
+                .then((data) => {
+                  window.location.reload();
+                });
+            });
+            const deleteBtnContainer = document.createElement("div");
+            deleteBtnContainer.style.display = "flex";
+            deleteBtnContainer.style.justifyContent = "flex-end";
+            deleteBtnContainer.appendChild(deleteBtn);
+            cardBody.appendChild(deleteBtnContainer);
+
+            cardBody.appendChild(cardText);
+            cardBody.appendChild(cardLink);
+            card.appendChild(cardBody);
+            document.querySelector(".container-timestamp").appendChild(card);
+          });
+        })
+        .catch((err) => {
+          // insertar mensaje de que no hay timestamps
+          const mensaje = document.createElement("p");
+          mensaje.innerHTML = "No se encontraron etiquetas";
+          document.querySelector(".container-timestamp").appendChild(mensaje);
+        });
+    </script>
   </body>
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
-    crossorigin="anonymous"
-  ></script>
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
-    const video_preview = document.querySelector("iframe");
-    video_preview.src = `https://drive.google.com/file/d/${id}/preview`;
-
-    const video_title = document.querySelector("#video-title");
-    const page_title = document.querySelector("#page-title");
-
-    let video = JSON.parse(localStorage.getItem("videoInfo"));
-    video_title.innerHTML = video.name;
-    page_title.innerHTML = video.name;
-
-    const timestamp = document.querySelector("#timestamp");
-    timestamp.addEventListener("click", () => {
-      video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=4`;
-    });
-  </script>
 </html>
