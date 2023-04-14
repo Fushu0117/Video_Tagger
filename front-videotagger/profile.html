@@ -84,7 +84,7 @@
         console.log("info: ", info);
         email = info.email;
         fetch(
-          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/user",
+          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/users",
           {
             method: "POST",
             headers: {
@@ -181,7 +181,7 @@
 
     function getVideosDB() {
       fetch(
-        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/video/${email}`
+        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/videos/${email}`
       )
         .then((res) => {
           return res.json();

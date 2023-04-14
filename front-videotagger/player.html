@@ -200,7 +200,7 @@
           videoTitle: video.name,
         };
         fetch(
-          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tag",
+          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags",
           {
             method: "POST",
             headers: {
@@ -216,7 +216,7 @@
       });
 
       fetch(
-        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tag/${id}/${video.email}`
+        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}/${video.email}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -254,7 +254,7 @@
             deleteBtn.addEventListener("click", () => {
               console.log("element", element.id);
               fetch(
-                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tag/${element.id}`,
+                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${element.id}`,
                 {
                   method: "DELETE",
                 }
