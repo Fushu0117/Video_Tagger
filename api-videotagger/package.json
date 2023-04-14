@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "build": "netlify deploy --prod",
     "dev": "nodemon app.js",
     "start": "node app.js",
     "lint": "eslint . --fix"
@@ -17,7 +18,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "netlify-cli": "^13.2.2",
+    "netlify-lambda": "^2.0.16",
+    "serverless-http": "^3.2.0"
   },
   "devDependencies": {
     "eslint": "^8.36.0",
