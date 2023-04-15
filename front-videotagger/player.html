@@ -114,6 +114,7 @@
                     class="btn-close"
                     data-bs-dismiss="modal"
                     aria-label="Close"
+                    id="btn-closeModal"
                   ></button>
                 </div>
                 <div class="modal-body">
@@ -176,7 +177,6 @@
 
       const timestamp = document.querySelector("#timestamp");
       timestamp?.addEventListener("click", () => {
-        console.log("click");
         video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=4`;
       });
 
@@ -211,19 +211,61 @@
         )
           .then((res) => res.json())
           .then((data) => {
-            window.location.reload();
+            const card = document.createElement("div");
+            card.classList.add("card", "m-1");
+            card.style.width = "28rem";
+            const cardBody = document.createElement("div");
+            cardBody.classList.add("card-body");
+            cardBody.style.display = "flex";
+            cardBody.style.flexDirection = "column";
+            const cardText = document.createElement("p");
+            cardText.classList.add("card-text");
+            cardText.innerHTML = note;
+            const cardLink = document.createElement("a");
+            cardLink.classList.add("btn", "btn-primary");
+            cardLink.innerHTML = `Saltar al minuto ${timestamp}`;
+            cardLink.addEventListener("click", () => {
+              const minutes = timestamp.split(":")[0];
+              const seconds = timestamp.split(":")[1];
+              const totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
+              video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${totalSeconds}`;
+            });
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.classList.add("btn", "btn-danger");
+            deleteBtn.innerHTML = `<i class="bi bi-trash"></i>`;
+            deleteBtn.addEventListener("click", () => {
+              fetch(
+                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}`,
+                {
+                  method: "DELETE",
+                }
+              )
+                .then((res) => res.json())
+                .then((data) => {
+                  card.remove();
+                });
+            });
+            const deleteBtnContainer = document.createElement("div");
+            deleteBtnContainer.style.display = "flex";
+            deleteBtnContainer.style.justifyContent = "flex-end";
+            deleteBtnContainer.appendChild(deleteBtn);
+            cardBody.appendChild(deleteBtnContainer);
+
+            cardBody.appendChild(cardText);
+            cardBody.appendChild(cardLink);
+            card.appendChild(cardBody);
+            document.querySelector(".container-timestamp").appendChild(card);
+            const btn_closeModal = document.querySelector("#btn-closeModal");
+            btn_closeModal.click();
           });
       });
-
       fetch(
         `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}/${video.email}`
       )
         .then((res) => res.json())
         .then((data) => {
-          console.log("data", data.data);
           data.data.forEach((element) => {
-            console.log(element);
-            console.log("element.time", element.timestamp);
             const card = document.createElement("div");
             card.classList.add("card", "m-1");
             card.style.width = "28rem";
@@ -238,21 +280,17 @@
             cardLink.classList.add("btn", "btn-primary");
             cardLink.innerHTML = `Saltar al minuto ${element.timestamp}`;
             cardLink.addEventListener("click", () => {
-              // convert timestamp to minutes
               const minutes = element.timestamp.split(":")[0];
               const seconds = element.timestamp.split(":")[1];
               const totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
 
               video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${totalSeconds}`;
-
-              // video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${element.timestamp}`;
             });
 
             const deleteBtn = document.createElement("button");
             deleteBtn.classList.add("btn", "btn-danger");
             deleteBtn.innerHTML = `<i class="bi bi-trash"></i>`;
             deleteBtn.addEventListener("click", () => {
-              console.log("element", element.id);
               fetch(
                 `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${element.id}`,
                 {
@@ -261,7 +299,7 @@
               )
                 .then((res) => res.json())
                 .then((data) => {
-                  window.location.reload();
+                  card.remove();
                 });
             });
             const deleteBtnContainer = document.createElement("div");
@@ -277,7 +315,6 @@
           });
         })
         .catch((err) => {
-          // insertar mensaje de que no hay timestamps
           const mensaje = document.createElement("p");
           mensaje.innerHTML = "No se encontraron etiquetas";
           document.querySelector(".container-timestamp").appendChild(mensaje);

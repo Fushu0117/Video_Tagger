@@ -81,7 +81,6 @@
     })
       .then((data) => data.json())
       .then((info) => {
-        console.log("info: ", info);
         email = info.email;
         fetch(
           "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/users",
@@ -120,8 +119,39 @@
     let result = document.querySelector("#result");
     let app = document.querySelector("#app");
     let ACCESS_TOKEN = info["access_token"];
+
+    // validate if there is a session storage
+    if (sessionStorage.getItem("gDriveFiles")) {
+      let files = JSON.parse(sessionStorage.getItem("gDriveFiles"));
+      app.innerHTML = `<table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody id="result"></tbody>
+      </table>
+
+      `;
+      result = document.querySelector("#result");
+      files.forEach((file) => {
+        result.innerHTML += `
+            <tr>
+                <th scope="row">${file.name}</th>
+                <td><a target="_blank" href="https://drive.google.com/file/d/${file.id}">${file.name}</a>
+                </td>
+                <td>
+                <button class="btn btn-primary" onclick="setVideo('${urlWithoutHtml}', '${file.id}', '${file.name}')">Ver</button>
+                </td>
+            </tr>
+            `;
+      });
+    }
+
     function searchFiles(q = "") {
       app.innerHTML = "";
+
       fetch(
         `https://www.googleapis.com/drive/v3/files?q=${q}&pageSize=50&supportsAllDrives=true&fields=files(name,id,mimeType)`,
         {
@@ -145,6 +175,10 @@
       </table>
       `;
           let result = document.querySelector("#result");
+
+          // save in session storage
+          sessionStorage.setItem("gDriveFiles", JSON.stringify(val.files));
+
           val.files.forEach((file) => {
             let id = file.id;
             result.innerHTML += `
@@ -187,7 +221,6 @@
           return res.json();
         })
         .then((val) => {
-          console.log("val: ", val);
           app.innerHTML = `<table class="table table-hover">
             <thead>
               <tr>
@@ -200,7 +233,6 @@
           `;
           let result = document.querySelector("#result");
           val.data.forEach((file) => {
-            console.log("file: ", file);
             result.innerHTML += `
             <tr>
                 <th scope="row">${file.title}</th>
