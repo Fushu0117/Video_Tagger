@@ -1,8 +1,4 @@
-const {
-  getUsers,
-  getUser,
-  insertUser
-} = require('../../../src/services/userService');
+const { getUsers, getUser, insertUser } = require('../services/userService');
 
 const getAll = async (_, res, next) => {
   try {

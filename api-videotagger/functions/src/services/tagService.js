@@ -14,15 +14,12 @@ const getTags = async () => {
 };
 
 const getTagsFromVideoAndEmail = async (video, email) => {
-  // get video ID from video url and email and order by timestamp
   const { data: videos, error: errorVideo } = await supabase
     .from('videos')
     .select()
     .eq('url', video)
     .eq('email', email)
     .order('id', { ascending: false });
-
-  console.log('videos: ' + JSON.stringify(videos));
 
   if (errorVideo) {
     console.log(colors.red('Error getting videos: ' + errorVideo));
@@ -38,13 +35,41 @@ const getTagsFromVideoAndEmail = async (video, email) => {
     .eq('video', videos[0]?.id)
     .eq('user', email);
   if (error) {
-    console.log(colors.red('Error getting tags: ' + error));
+    console.log(colors.red('Error getting tags: ' + JSON.stringify(error)));
     return {
       status: 500,
       error: error
     };
   }
-  return { status: 200, data: data };
+
+  const orderedData = data.sort((a, b) => {
+    const aTime = a.timestamp.split(':');
+    const bTime = b.timestamp.split(':');
+
+    const secondsInHour = 3600;
+    const secondsInMinute = 60;
+
+    if (aTime.length === 3 && bTime.length === 3) {
+      return (
+        parseInt(aTime[0]) * secondsInHour +
+        parseInt(aTime[1]) * secondsInMinute +
+        parseInt(aTime[2]) -
+        (parseInt(bTime[0]) * secondsInHour +
+          parseInt(bTime[1]) * secondsInMinute +
+          parseInt(bTime[2]))
+      );
+    } else if (aTime.length === 2 && bTime.length === 2) {
+      return (
+        parseInt(aTime[0]) * secondsInMinute +
+        parseInt(aTime[1]) -
+        (parseInt(bTime[0]) * secondsInMinute + parseInt(bTime[1]))
+      );
+    } else {
+      return 0;
+    }
+  });
+
+  return { status: 200, data: orderedData };
 };
 
 const insertTag = async (tag) => {
@@ -68,7 +93,6 @@ const insertTag = async (tag) => {
 };
 
 const deleteTag = async (tag) => {
-  // get video ID from tag id
   const { data: videoId, error: errorTag } = await supabase
     .from('tags')
     .select()

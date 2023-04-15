@@ -3,7 +3,7 @@ const {
   getTagsFromVideoAndEmail,
   insertTag,
   deleteTag
-} = require('../../../src/services/tagService');
+} = require('../services/tagService');
 
 const getAll = async (_, res, next) => {
   try {

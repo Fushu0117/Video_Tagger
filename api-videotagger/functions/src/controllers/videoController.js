@@ -2,7 +2,7 @@ const {
   getVideos,
   getVideosFromEmail,
   insertVideo
-} = require('../../../src/services/videoService');
+} = require('../services/videoService');
 
 const getAll = async (_, res, next) => {
   try {

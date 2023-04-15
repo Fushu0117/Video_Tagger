@@ -2,11 +2,11 @@
   "name": "api-videotagger",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "./functions/app.js",
   "scripts": {
     "build": "netlify deploy --prod",
-    "dev": "nodemon app.js",
-    "start": "node app.js",
+    "dev": "nodemon ./functions/app.js",
+    "start": "node ./functions/app.js",
     "lint": "eslint . --fix"
   },
   "keywords": [],

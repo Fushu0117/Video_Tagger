@@ -17,7 +17,8 @@ const getVideosFromEmail = async (email) => {
   const { data, error } = await supabase
     .from('videos')
     .select()
-    .eq('email', email);
+    .eq('email', email)
+    .order('created_at', { ascending: false });
   if (error) {
     console.log(colors.red('Error getting videos: ' + error));
     return {
