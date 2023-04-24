@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./css/style.css" />
-    <link rel="stylesheet" href="./css/videoPlayer.css" />
+    <!-- <link rel="stylesheet" href="./css/videoPlayer.css" /> -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -26,6 +26,7 @@
       crossorigin="anonymous"
     ></script>
     <title id="page-title">Player</title>
+    <script src="https://www.youtube.com/iframe_api"></script>
   </head>
   <body>
     <style>
@@ -77,11 +78,23 @@
 
         /* padding: 50px; */
       }
+      .video-author {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 1rem;
+      }
+      .video-author p {
+        margin-right: 0.5rem;
+      }
     </style>
 
     <h1 id="video-title" class="text-center m-5"></h1>
     <div class="container">
       <div class="container-player">
+        <div class="video-author">
+          <p>Subido por:</p>
+          <p id="video-author"></p>
+        </div>
         <div class="yt">
           <iframe
             class="border-2"
@@ -89,6 +102,7 @@
             width="560"
             height="315"
             allowfullscreen
+            id="ytplayer"
           ></iframe>
         </div>
         <div class="mt-2" id="botones">
@@ -99,6 +113,7 @@
             class="btn btn-primary m-1"
             data-bs-toggle="modal"
             data-bs-target="#contenedor-modal"
+            id="btn-timestamp"
           >
             Crear timestamp
           </button>
@@ -175,6 +190,10 @@
       video_title.innerHTML = video.name;
       page_title.innerHTML = video.name;
 
+      const video_author = document.querySelector("#video-author");
+      let user = JSON.parse(localStorage.getItem("videoInfo"));
+      video_author.innerHTML = user.user_name;
+
       const timestamp = document.querySelector("#timestamp");
       timestamp?.addEventListener("click", () => {
         video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=4`;
@@ -188,6 +207,40 @@
       const form = document.querySelector("form");
       const btnSave = document.querySelector("#btn-save");
 
+      const btn_timestamp = document.querySelector("#btn-timestamp");
+
+      // if i click on the button, the modal will open
+      btn_timestamp?.addEventListener("click", () => {
+        console.log("click");
+
+        const iframeDoc =
+          video_preview.contentDocument || video_preview.contentWindow.document;
+        console.log(iframeDoc);
+
+        const modal = document.querySelector("#contenedor-modal");
+        modal.classList.add("show");
+        let timestamp = document.querySelector("#timestamp-input");
+        console.log(timestamp);
+
+        let time = video.currentTime;
+        console.log(time);
+        let hours = Math.floor(time / 3600);
+        let minutes = Math.floor((time - hours * 3600) / 60);
+        let seconds = Math.floor(time - hours * 3600 - minutes * 60);
+        if (hours < 10) {
+          hours = "0" + hours;
+        }
+        if (minutes < 10) {
+          minutes = "0" + minutes;
+        }
+        if (seconds < 10) {
+          seconds = "0" + seconds;
+        }
+        timestamp.value = `${hours}:${minutes}:${seconds}`;
+
+        modal.style.display = "block";
+      });
+
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         const timestamp = document.querySelector("#timestamp-input").value;
@@ -199,119 +252,127 @@
           video: id,
           videoTitle: video.name,
         };
-        fetch(
-          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-          }
-        )
+        fetch("http://localhost:3001/api/tag", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
           .then((res) => res.json())
           .then((data) => {
-            const card = document.createElement("div");
-            card.classList.add("card", "m-1");
-            card.style.width = "28rem";
-            const cardBody = document.createElement("div");
-            cardBody.classList.add("card-body");
-            cardBody.style.display = "flex";
-            cardBody.style.flexDirection = "column";
-            const cardText = document.createElement("p");
-            cardText.classList.add("card-text");
-            cardText.innerHTML = note;
-            const cardLink = document.createElement("a");
-            cardLink.classList.add("btn", "btn-primary");
-            cardLink.innerHTML = `Saltar al minuto ${timestamp}`;
-            cardLink.addEventListener("click", () => {
+            const commentList = document.createElement("ol");
+            commentList.classList.add("comment-list");
+            commentList.id = "comment-list";
+            commentList.style.height = "540px";
+            const comment = document.createElement("li");
+            comment.classList.add("single-comment", "fade-in");
+            comment.id = "cmt_1451";
+            comment.style.opacity = "1";
+            const commentInfo = document.createElement("span");
+            commentInfo.classList.add("comment-info");
+            const author = document.createElement("span");
+            author.classList.add("author");
+            author.innerHTML = data.data[0].user_name;
+            const btn_timestamp = document.createElement("a");
+            btn_timestamp.classList.add("timestamp");
+            btn_timestamp.innerHTML = timestamp;
+            btn_timestamp.addEventListener("click", () => {
               const minutes = timestamp.split(":")[0];
               const seconds = timestamp.split(":")[1];
               const totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
+
               video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${totalSeconds}`;
             });
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.classList.add("btn", "btn-danger");
-            deleteBtn.innerHTML = `<i class="bi bi-trash"></i>`;
-            deleteBtn.addEventListener("click", () => {
-              fetch(
-                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}`,
-                {
-                  method: "DELETE",
-                }
-              )
+            const deleteComment = document.createElement("a");
+            deleteComment.classList.add("delete-comment");
+            deleteComment.innerHTML = `<i class="bi bi-trash"></i>`;
+            deleteComment.addEventListener("click", () => {
+              fetch(`http://localhost:3001/api/tag/${id}`, {
+                method: "DELETE",
+              })
                 .then((res) => res.json())
                 .then((data) => {
-                  card.remove();
+                  comment.remove();
+                  // remove its space beetwen comments
+                  const commentList = document.querySelector("#comment-list");
+                  if (commentList.children.length === 0) {
+                    commentList.remove();
+                  }
                 });
             });
-            const deleteBtnContainer = document.createElement("div");
-            deleteBtnContainer.style.display = "flex";
-            deleteBtnContainer.style.justifyContent = "flex-end";
-            deleteBtnContainer.appendChild(deleteBtn);
-            cardBody.appendChild(deleteBtnContainer);
+            const commentText = document.createElement("span");
+            commentText.classList.add("comment-text");
+            commentText.innerHTML = note;
+            commentInfo.appendChild(author);
+            commentInfo.appendChild(btn_timestamp);
+            commentInfo.appendChild(deleteComment);
+            comment.appendChild(commentInfo);
+            comment.appendChild(commentText);
+            commentList.appendChild(comment);
 
-            cardBody.appendChild(cardText);
-            cardBody.appendChild(cardLink);
-            card.appendChild(cardBody);
-            document.querySelector(".container-timestamp").appendChild(card);
+            document
+              .querySelector(".container-timestamp")
+              .appendChild(commentList);
+
+            //
+
             const btn_closeModal = document.querySelector("#btn-closeModal");
             btn_closeModal.click();
           });
       });
-      fetch(
-        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}/${video.email}`
-      )
+      fetch(`http://localhost:3001/api/tag/${id}/${video.email}`)
         .then((res) => res.json())
         .then((data) => {
           data.data.forEach((element) => {
-            const card = document.createElement("div");
-            card.classList.add("card", "m-1");
-            card.style.width = "28rem";
-            const cardBody = document.createElement("div");
-            cardBody.classList.add("card-body");
-            cardBody.style.display = "flex";
-            cardBody.style.flexDirection = "column";
-            const cardText = document.createElement("p");
-            cardText.classList.add("card-text");
-            cardText.innerHTML = element.note;
-            const cardLink = document.createElement("a");
-            cardLink.classList.add("btn", "btn-primary");
-            cardLink.innerHTML = `Saltar al minuto ${element.timestamp}`;
-            cardLink.addEventListener("click", () => {
+            const commentList = document.createElement("ol");
+            commentList.classList.add("comment-list");
+            commentList.id = "comment-list";
+            commentList.style.height = "540px";
+            const comment = document.createElement("li");
+            comment.classList.add("single-comment", "fade-in");
+            comment.id = "cmt_1451";
+            comment.style.opacity = "1";
+            const commentInfo = document.createElement("span");
+            commentInfo.classList.add("comment-info");
+            const author = document.createElement("span");
+            author.classList.add("author");
+            author.innerHTML = element.user_name;
+            const timestamp = document.createElement("a");
+            timestamp.classList.add("timestamp");
+            timestamp.innerHTML = element.timestamp;
+            timestamp.addEventListener("click", () => {
               const minutes = element.timestamp.split(":")[0];
               const seconds = element.timestamp.split(":")[1];
               const totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
 
               video_preview.src = `https://drive.google.com/file/d/${id}/preview?t=${totalSeconds}`;
             });
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.classList.add("btn", "btn-danger");
-            deleteBtn.innerHTML = `<i class="bi bi-trash"></i>`;
-            deleteBtn.addEventListener("click", () => {
-              fetch(
-                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${element.id}`,
-                {
-                  method: "DELETE",
-                }
-              )
+            const deleteComment = document.createElement("a");
+            deleteComment.classList.add("delete-comment");
+            deleteComment.innerHTML = `<i class="bi bi-trash"></i>`;
+            deleteComment.addEventListener("click", () => {
+              fetch(`http://localhost:3001/api/tag/${element.id}`, {
+                method: "DELETE",
+              })
                 .then((res) => res.json())
                 .then((data) => {
-                  card.remove();
+                  comment.remove();
                 });
             });
-            const deleteBtnContainer = document.createElement("div");
-            deleteBtnContainer.style.display = "flex";
-            deleteBtnContainer.style.justifyContent = "flex-end";
-            deleteBtnContainer.appendChild(deleteBtn);
-            cardBody.appendChild(deleteBtnContainer);
+            const commentText = document.createElement("span");
+            commentText.classList.add("comment-text");
+            commentText.innerHTML = element.note;
+            commentInfo.appendChild(author);
+            commentInfo.appendChild(timestamp);
+            commentInfo.appendChild(deleteComment);
+            comment.appendChild(commentInfo);
+            comment.appendChild(commentText);
+            commentList.appendChild(comment);
 
-            cardBody.appendChild(cardText);
-            cardBody.appendChild(cardLink);
-            card.appendChild(cardBody);
-            document.querySelector(".container-timestamp").appendChild(card);
+            document
+              .querySelector(".container-timestamp")
+              .appendChild(commentList);
           });
         })
         .catch((err) => {

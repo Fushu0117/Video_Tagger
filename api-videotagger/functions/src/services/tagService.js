@@ -2,6 +2,7 @@ const supabase = require('./dbService');
 const colors = require('../utils/colors');
 
 const getTags = async () => {
+  console.log('getTags');
   const { data, error } = await supabase.from('tags').select('*, videos(*)');
   if (error) {
     console.log(colors.red('Error getting tags: ' + error));
@@ -14,11 +15,12 @@ const getTags = async () => {
 };
 
 const getTagsFromVideoAndEmail = async (video, email) => {
+  // get video id
   const { data: videos, error: errorVideo } = await supabase
     .from('videos')
     .select()
     .eq('url', video)
-    .eq('email', email)
+    // .eq('email', email)
     .order('id', { ascending: false });
 
   if (errorVideo) {
@@ -29,11 +31,46 @@ const getTagsFromVideoAndEmail = async (video, email) => {
     };
   }
 
+  // insert name according to email
+  const { data: users, error: errorUsers } = await supabase
+    .from('users')
+    .select();
+  if (errorUsers) {
+    console.log(colors.red('Error getting users: ' + errorUsers));
+    return {
+      status: 500,
+      error: errorUsers
+    };
+  }
+
+  // get tags
   const { data, error } = await supabase
     .from('tags')
     .select()
     .eq('video', videos[0]?.id)
-    .eq('user', email);
+    .order('timestamp', { ascending: true });
+
+  if (error) {
+    console.log(colors.red('Error getting tags: ' + error));
+    return {
+      status: 500,
+      error: error
+    };
+  }
+
+  data.forEach((tag) => {
+    const user = users.find((user) => user.email === tag.user);
+    tag.user_name = user.name;
+  });
+
+  // // add user data to tags
+  // const { data, error } = await supabase
+  //   .from('tags')
+  //   // .join('users', 'users.email', 'tags.user')
+  //   .select()
+  //   .eq('video', videos[0]?.id);
+  // // .eq('user', email);
+
   if (error) {
     console.log(colors.red('Error getting tags: ' + JSON.stringify(error)));
     return {
@@ -74,14 +111,27 @@ const getTagsFromVideoAndEmail = async (video, email) => {
 
 const insertTag = async (tag) => {
   let result = await validateVideo(tag);
+  console.log('result', result);
   let videoId = result.data[0].id;
-  const { data, error } = await supabase.from('tags').insert({
-    video: videoId,
-    user: tag.user,
-    tag: tag.tag,
-    note: tag.note,
-    timestamp: tag.timestamp
-  });
+
+  const { data, error } = await supabase
+    .from('tags')
+    .insert({
+      video: videoId,
+      user: tag.user,
+      tag: tag.tag,
+      note: tag.note,
+      timestamp: tag.timestamp
+    })
+    .select();
+
+  // insert user name to tag
+  const { data: user, error: errorUser } = await supabase
+    .from('users')
+    .select()
+    .eq('email', tag.user);
+  data[0].user_name = user[0].name;
+
   if (error) {
     console.log(colors.red('Error inserting tags: ' + error));
     return {
@@ -143,35 +193,44 @@ const deleteTag = async (tag) => {
 };
 
 const validateVideo = async (info) => {
-  const { data, error } = await supabase
+  console.log(colors.blue('Validating video...'));
+  console.log(colors.blue('Video info: ' + JSON.stringify(info)));
+  const { data: existingVideos, error: errorExistingVideos } = await supabase
     .from('videos')
     .select()
-    .eq('url', info.video)
-    .eq('email', info.user);
-
-  if (error) {
-    console.log(colors.red('Error getting videos: ' + error));
+    .eq('url', info.video);
+  if (errorExistingVideos) {
+    console.log(
+      colors.red('Error getting existing videos: ' + errorExistingVideos)
+    );
     return {
       status: 500,
-      error: error
+      error: errorExistingVideos
     };
   }
-
-  if (data.length === 0) {
-    const { data, error } = await supabase
+  if (existingVideos.length > 0) {
+    console.log(colors.yellow('Video already exists'));
+    console.log(colors.yellow('Existing videos: ' + existingVideos));
+    return { status: 200, data: existingVideos };
+  } else {
+    console.log(colors.blue('Video does not exist'));
+    const { data: newVideos, error: errorNewVideos } = await supabase
       .from('videos')
-      .insert({ title: info.videoTitle, url: info.video, email: info.user })
+      .insert({
+        title: info.videoTitle,
+        url: info.video,
+        email: info.user
+      })
       .select();
-    if (error) {
-      console.log(colors.red('Error inserting video: ' + error));
+    if (errorNewVideos) {
+      console.log(colors.red('Error inserting new video: ' + errorNewVideos));
       return {
         status: 500,
-        error: error
+        error: errorNewVideos
       };
     }
-    return { status: 200, data: data };
+    return { status: 200, data: newVideos };
   }
-  return { status: 200, data: data };
 };
 
 module.exports = {
