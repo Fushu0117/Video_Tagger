@@ -23,17 +23,20 @@ async function getUserInfo() {
     );
     const data = await response.json();
     email = data.email;
-    const res = await fetch("http://localhost:3001/api/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: data.name,
-        email: data.email,
-        image_url: data.picture,
-      }),
-    });
+    const res = await fetch(
+      "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/users",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          image_url: data.picture,
+        }),
+      }
+    );
     const userData = await res.json();
     document.getElementById("name").innerHTML += data.name;
     document.getElementById("image").setAttribute("src", data.picture);

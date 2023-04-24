@@ -252,13 +252,16 @@
           video: id,
           videoTitle: video.name,
         };
-        fetch("http://localhost:3001/api/tag", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        })
+        fetch(
+          "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        )
           .then((res) => res.json())
           .then((data) => {
             const commentList = document.createElement("ol");
@@ -288,9 +291,12 @@
             deleteComment.classList.add("delete-comment");
             deleteComment.innerHTML = `<i class="bi bi-trash"></i>`;
             deleteComment.addEventListener("click", () => {
-              fetch(`http://localhost:3001/api/tag/${id}`, {
-                method: "DELETE",
-              })
+              fetch(
+                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}`,
+                {
+                  method: "DELETE",
+                }
+              )
                 .then((res) => res.json())
                 .then((data) => {
                   comment.remove();
@@ -321,7 +327,9 @@
             btn_closeModal.click();
           });
       });
-      fetch(`http://localhost:3001/api/tag/${id}/${video.email}`)
+      fetch(
+        `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${id}/${video.email}`
+      )
         .then((res) => res.json())
         .then((data) => {
           data.data.forEach((element) => {
@@ -352,9 +360,12 @@
             deleteComment.classList.add("delete-comment");
             deleteComment.innerHTML = `<i class="bi bi-trash"></i>`;
             deleteComment.addEventListener("click", () => {
-              fetch(`http://localhost:3001/api/tag/${element.id}`, {
-                method: "DELETE",
-              })
+              fetch(
+                `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/tags/${element.id}`,
+                {
+                  method: "DELETE",
+                }
+              )
                 .then((res) => res.json())
                 .then((data) => {
                   comment.remove();

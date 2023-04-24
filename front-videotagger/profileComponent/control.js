@@ -25,17 +25,20 @@ fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
   .then((response) => response.json())
   .then((data) => {
     email = data.email;
-    fetch("http://localhost:3001/api/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: data.name,
-        email: data.email,
-        image_url: data.picture,
-      }),
-    });
+    fetch(
+      "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/users",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          image_url: data.picture,
+        }),
+      }
+    );
 
     document.getElementById("name").innerHTML += data.name;
     document.getElementById("image").setAttribute("src", data.picture);
@@ -159,7 +162,9 @@ function setVideo(url, id, fileName) {
 }
 
 function getVideosDB() {
-  fetch("http://localhost:3001/api/video/")
+  fetch(
+    "https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/videos/"
+  )
     .then((res) => res.json())
     .then(({ data }) => {
       app.innerHTML = `
