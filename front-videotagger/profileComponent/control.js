@@ -1,6 +1,6 @@
 const url = window.location.href;
-let urlWithoutHtml = url.slice(0, url.lastIndexOf("/"));
 const regex = /([^&=]+)=([^&]*)/g;
+const urlWithoutHtml = window.location.origin;
 const params = {};
 let m;
 while ((m = regex.exec(location.href))) {
@@ -12,10 +12,6 @@ if (Object.keys(params).length) {
 
 let info = JSON.parse(localStorage.getItem("authInfo"));
 let email = "";
-
-urlWithoutHtml = urlWithoutHtml.substring(0, urlWithoutHtml.lastIndexOf("#"));
-urlWithoutHtml = urlWithoutHtml.substring(0, urlWithoutHtml.lastIndexOf("/"));
-window.location.hash = "";
 
 fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
   headers: {
@@ -145,20 +141,52 @@ function getVideos() {
   app.innerHTML = `
     <div class="d-flex justify-content-center">
       <div class="spinner-border text-primary" role="status">
-        <span class="sr-only">Loading...</span>
       </div>
     </div>
   `;
 }
 
-function setVideo(url, id, fileName) {
-  let userName = document.getElementById("name").innerHTML;
-
-  localStorage.setItem(
-    "videoInfo",
-    JSON.stringify({ name: fileName, email, user_name: userName })
-  );
-  location.href = `${url}/player.html?id=${id}`;
+function setVideo(url, id, fileName, userName) {
+  let views = 0;
+  if (!userName) {
+    fetch(
+      `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/users/`
+    )
+      .then((res) => res.json())
+      .then(({ data }) => {
+        const user = data.find((user) => user.email === email);
+        if (user) userName = user.name;
+        setVideo(url, id, fileName, userName);
+      });
+    return;
+  }
+  // increase a view in videos
+  fetch(
+    `https://stunning-capybara-1efe1a.netlify.app/.netlify/functions/api/videos/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    }
+  )
+    .then((res) => res.json())
+    .then(({ data }) => {
+      if (!data) {
+        data = [
+          {
+            views: 0,
+          },
+        ];
+      }
+      views = data[0].views;
+      localStorage.setItem(
+        "videoInfo",
+        JSON.stringify({ name: fileName, email, user_name: userName, views })
+      );
+      location.href = `${url}/player.html?id=${id}`;
+    });
 }
 
 function getVideosDB() {
@@ -191,7 +219,7 @@ function getVideosDB() {
               <p>${user_name}</p>
             </td>
             <td>
-              <button class="btn btn-primary" onclick="setVideo('${urlWithoutHtml}', '${url}', '${title}')">Ver</button>
+              <button class="btn btn-primary" onclick="setVideo('${urlWithoutHtml}', '${url}', '${title}', '${user_name}')">Ver</button>
             </td>
           </tr>
         `;
