@@ -1,7 +1,8 @@
 const {
   getVideos,
   getVideosFromEmail,
-  insertVideo
+  insertVideo,
+  updateViewCount
 } = require('../services/videoService');
 
 const getAll = async (_, res, next) => {
@@ -31,8 +32,18 @@ const post = async (req, res, next) => {
   }
 };
 
+const put = async (req, res, next) => {
+  try {
+    const video = await updateViewCount(req.params.id);
+    res.status(200).json(video);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAll,
   getFromEmail,
-  post
+  post,
+  put
 };
